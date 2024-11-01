@@ -2,12 +2,11 @@
 <html>
 
 <head>
-    @vite('resources/css/app.css')
+    @vite('resources/js/app.ts')
 </head>
 
 <body>
     <div id="app"></div>
-    @vite('resources/js/app.js')
 </body>
 
 </html>

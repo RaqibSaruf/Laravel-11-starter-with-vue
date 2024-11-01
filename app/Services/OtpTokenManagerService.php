@@ -10,29 +10,24 @@ use Carbon\Carbon;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 
 class OtpTokenManagerService
 {
     /**
-     * @var int $expires in seconds
+     * @var int in seconds
      */
     private $expires;
 
     /**
-     * @var int $expires in seconds
+     * @var int in seconds
      */
     private $throttle;
 
-
     /**
-     * @var OtpVerificationToken|null $otpVerificationToken
+     * @var OtpVerificationToken|null
      */
     private $otpVerificationToken;
 
-    /**
-     * @param string $email
-     */
     public function __construct(private string $email)
     {
         $this->expires = 240; // 240 seconds
@@ -41,8 +36,6 @@ class OtpTokenManagerService
 
     /**
      * Create a new token record.
-     *
-     * @return OtpVerificationToken
      */
     public function create(): OtpVerificationToken
     {
@@ -61,7 +54,7 @@ class OtpTokenManagerService
             'email' => $this->getEmail(),
             'token' => Hash::make($token),
             'otp' => $this->generateOtp(),
-            'created_at' => new Carbon,
+            'created_at' => new Carbon(),
         ]);
 
         return $this->otpVerificationToken;
@@ -69,7 +62,6 @@ class OtpTokenManagerService
 
     /**
      * Delete all existing reset tokens from the database.
-     * @return void
      */
     private function deleteExisting(): void
     {
@@ -81,18 +73,15 @@ class OtpTokenManagerService
     }
 
     /**
-     * Create a new token for the user.     *
-     * @return string
+     * Create a new token for the user.     *.
      */
     private function createNewToken(): string
     {
         return Hash::make(Str::random(20));
     }
 
-
     /**
      * Determine if a record exists.
-     * @return bool
      */
     public function exists(): bool
     {
@@ -103,8 +92,8 @@ class OtpTokenManagerService
 
     /**
      * Determine if a token record is valid.
-     * @param  string  $token
-     * @return bool
+     *
+     * @param string $token
      */
     public function checkToken(#[\SensitiveParameter] $token): bool
     {
@@ -115,8 +104,8 @@ class OtpTokenManagerService
 
     /**
      * Determine if otp is valid.
-     * @param  string  $otp
-     * @return bool
+     *
+     * @param string $otp
      */
     public function checkOtp(#[\SensitiveParameter] string $otp): bool
     {
@@ -127,7 +116,6 @@ class OtpTokenManagerService
 
     /**
      * Determine if the token has expired.
-     * @return bool
      */
     public function expired(): bool
     {
@@ -138,7 +126,6 @@ class OtpTokenManagerService
 
     /**
      * Determine if the given user recently created a token.
-     * @return bool
      */
     public function recentlyCreatedToken(): bool
     {
@@ -149,8 +136,8 @@ class OtpTokenManagerService
 
     /**
      * Determine if the token was recently created.
-     * @param  string  $createdAt
-     * @return bool
+     *
+     * @param string $createdAt
      */
     protected function tokenRecentlyCreated($createdAt): bool
     {
@@ -168,10 +155,10 @@ class OtpTokenManagerService
         return $this->email;
     }
 
-    public function getRecord(): OtpVerificationToken|null
+    public function getRecord(): ?OtpVerificationToken
     {
         if (!$this->otpVerificationToken) {
-            $this->otpVerificationToken  = OtpVerificationToken::where('email', $this->getEmail())->first();
+            $this->otpVerificationToken = OtpVerificationToken::where('email', $this->getEmail())->first();
         }
 
         return $this->otpVerificationToken;
@@ -188,6 +175,7 @@ class OtpTokenManagerService
 
         if ($record) {
             $record->update(['verified' => 1]);
+
             return true;
         }
 
@@ -200,6 +188,7 @@ class OtpTokenManagerService
 
         if ($record) {
             $record->update(['revoked' => 1]);
+
             return true;
         }
 

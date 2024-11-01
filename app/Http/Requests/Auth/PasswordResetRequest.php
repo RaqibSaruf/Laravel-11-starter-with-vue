@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class PasswordResetRequest extends FormRequest
@@ -33,9 +34,7 @@ class PasswordResetRequest extends FormRequest
     {
         $user = User::where('email', $this->email)->first();
         if (!$user) {
-            throw ValidationException::withMessages([
-                'email' => 'Email not exists',
-            ]);
+            throw ValidationException::withMessages(['email' => 'Email not exists']);
         }
 
         return $user;

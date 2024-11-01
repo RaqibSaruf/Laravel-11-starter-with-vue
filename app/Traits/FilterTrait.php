@@ -6,21 +6,29 @@ namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 trait FilterTrait
 {
-    public function scopeFilter(Builder $query, array $filters = []): Builder
+    protected function getLikeFilterFields(): array
     {
+        return $this->likeFilterFields ?? [];
+    }
+
+    public function scopeFilter(Builder $query, Request|array $queryParam = []): Builder
+    {
+        $filters = $queryParam instanceof Request ? $queryParam->query->all() : $queryParam;
         if ($filters) {
             $defaultFillableFields = $this->fillable;
             $table = $this->getTable();
+            $likeFilterFields = $this->getLikeFilterFields();
             foreach ($filters as $field => $value) {
                 if (!in_array($field, $defaultFillableFields, true)) {
                     continue;
                 }
 
-                if ($this->likeFilterFields && in_array($field, $this->likeFilterFields, true) && $value) {
+                if ($likeFilterFields && in_array($field, $likeFilterFields, true) && $value) {
                     $query->where($table . '.' . $field, 'LIKE', "%$value%");
                 } elseif (is_array($value) && !empty($value)) {
                     $query->whereIn($table . '.' . $field, $value);
@@ -34,12 +42,11 @@ trait FilterTrait
     }
 
     /**
-     * This method is using for creating relational query
-     * For this method we have to create getLikeFilterFields method in relational table otherwise it throws error.
+     * This method is using for creating relational query.
      *
      * @return $query
      */
-    public function scopeWithFilter(Builder $query, string $relationName, array $filters = []): Builder
+    public function scopeWithFilter(Builder $query, string $relationName, Request|array $queryParam = []): Builder
     {
         try {
             $relations = explode('.', $relationName);
@@ -55,23 +62,19 @@ trait FilterTrait
             throw new ModelNotFoundException($e->getMessage(), Response::HTTP_NOT_FOUND);
         }
 
+        $filters = $queryParam instanceof Request ? $queryParam->query->all() : $queryParam;
         if ($filters) {
             $defaultFillableFields = $model->getFillable();
-            $likeFilterFields = [];
-            if (method_exists($model, 'getLikeFilterFields')) {
-                $likeFilterFields = $model->getLikeFilterFields();
-            }
-
+            $likeFilterFields = method_exists($model, 'getLikeFilterFields') ? $model->getLikeFilterFields() : [];
             $table = $model->getTable();
-
             foreach ($filters as $field => $value) {
                 if (!in_array($field, $defaultFillableFields, true)) {
                     continue;
                 }
                 $query->whereHas($relationName, function ($query) use ($field, $value, $likeFilterFields, $table) {
-                    if ($likeFilterFields && in_array($field, $likeFilterFields, true)  && $value) {
+                    if ($likeFilterFields && in_array($field, $likeFilterFields, true) && $value) {
                         $query->where($table . '.' . $field, 'LIKE', "%$value%");
-                    } elseif (is_array($value)  && !empty($value)) {
+                    } elseif (is_array($value) && !empty($value)) {
                         $query->whereIn($table . '.' . $field, $value);
                     } elseif (is_numeric($value) || is_bool($value) || $value) {
                         $query->where($table . '.' . $field, $value);
@@ -83,17 +86,32 @@ trait FilterTrait
         return $query;
     }
 
-    public function scopeSort(Builder $query, array $filters = []): Builder
+    public function scopeSort(Builder $query, Request|array|string $orderBy = 'id', string $sortDirection = 'desc'): Builder
     {
-        $query->orderBy($this->getTable() . '.' . ($filters['order_by'] ?? 'id'), $filters['dir'] ?? 'desc');
+        if ($orderBy instanceof Request) {
+            $request = $orderBy;
+            $orderBy = $request->input('order_by', 'id');
+            $sortDirection = $request->input('dir', $sortDirection);
+        } elseif (is_array($orderBy)) {
+            $orderBy = $filters['order_by'] ?? 'id';
+            $sortDirection = $filters['dir'] ?? $sortDirection;
+        }
+
+        $query->orderBy($this->getTable() . '.' . $orderBy, $sortDirection);
 
         return $query;
     }
 
-    public function scopeSearch(Builder $query, array $filters = []): Builder
+    public function scopeSearch(Builder $query, Request|array|string $searchable = ''): Builder
     {
-        if (!empty($filters['s'])) {
-            return $this->buildSearchQuery($query, $filters['s']);
+        if ($searchable instanceof Request) {
+            $searchable = $searchable->input('s', '');
+        } elseif (is_array($searchable)) {
+            $searchable = $searchable['s'] ?? '';
+        }
+
+        if (!empty($searchable)) {
+            return $this->buildSearchQuery($query, $searchable);
         }
 
         return $query;

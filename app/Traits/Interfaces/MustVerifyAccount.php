@@ -6,10 +6,13 @@ namespace App\Traits\Interfaces;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-interface VerifyAccount extends MustVerifyEmail
+interface MustVerifyAccount extends MustVerifyEmail
 {
     public function hasVerifiedPhone(): bool;
+
     public function markPhoneAsVerified(): bool;
+
     public function getPhoneForVerification(): string;
+
     public function isVerified(): bool;
 }

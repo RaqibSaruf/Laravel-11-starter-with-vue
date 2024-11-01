@@ -1,22 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Notifications\SendVerificationOtp;
-use App\Traits\ModelActions;
-use App\Traits\VerifyAccount;
+use App\Traits\FilterTrait;
+use App\Traits\ModelActionTrait;
+use App\Traits\VerifyAccountTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, VerifyAccount, ModelActions, SoftDeletes;
+    use HasApiTokens;
+    use HasFactory;
+    use HasRoles;
+    use Notifiable;
+    use VerifyAccountTrait;
+    use ModelActionTrait;
+    use SoftDeletes;
+    use FilterTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -40,7 +50,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'email_verified_at'
+        'email_verified_at',
+        'deleted_at',
     ];
 
     /**
@@ -59,11 +70,16 @@ class User extends Authenticatable
 
     protected $avoidDuplicateColumns = [
         'email',
-        'phone'
+        'phone',
     ];
 
-    public function routeNotificationForSms()
+    public function buildSearchQuery(Builder $query, $searchableText): Builder
     {
-        return $this->phone ? ($this->phone_country_code ?? '' . '' . $this->phone) : '';
+        return $query->where(function (Builder $query) use ($searchableText) {
+            $tableName = $this->getTable();
+            $query->where($tableName . '.name', 'LIKE', '%' . $searchableText . '%')
+                ->orWhere($tableName . '.email', 'LIKE', '%' . $searchableText . '%')
+                ->orWhereRaw("CONCAT({$tableName}.phone_country_code, '', {$tableName}phone) LIKE ?", ['%' . $searchableText . '%']);
+        });
     }
 }

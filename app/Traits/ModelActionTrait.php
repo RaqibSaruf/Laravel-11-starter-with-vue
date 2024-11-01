@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
-trait ModelActions
+trait ModelActionTrait
 {
     private static $DELIMITER = '::';
 
@@ -71,9 +71,7 @@ trait ModelActions
             return $result ? true : false;
         }
 
-        throw ValidationException::withMessages([
-            $identifierName => "Please provide valid $identifierName's"
-        ]);
+        throw ValidationException::withMessages([$identifierName => "Please provide valid $identifierName's"]);
     }
 
     public function scopeDeleteMany(Builder $query, array $identifiers, string $identifierName = 'id'): bool
@@ -89,9 +87,7 @@ trait ModelActions
             return $result ? true : false;
         }
 
-        throw ValidationException::withMessages([
-            $identifierName => "Please provide valid $identifierName's"
-        ]);
+        throw ValidationException::withMessages([$identifierName => "Please provide valid $identifierName's"]);
     }
 
     public function scopeUpdateMany(Builder $query, array $updatedData, array $identifiers, string $identifierName = 'id'): bool
@@ -115,8 +111,6 @@ trait ModelActions
             return $result ? true : false;
         }
 
-        throw ValidationException::withMessages([
-            $identifierName => "Please provide valid $identifierName's"
-        ]);
+        throw ValidationException::withMessages([$identifierName => "Please provide valid $identifierName's"]);
     }
 }

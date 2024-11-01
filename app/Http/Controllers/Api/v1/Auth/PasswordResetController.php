@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api\v1\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\PasswordResetRequest;
 use App\Notifications\SendPasswordResetOtp;
 use App\Services\OtpTokenManagerService;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\JsonResponse as Response;
 
 class PasswordResetController extends Controller
 {
-    public function store(PasswordResetRequest $request): JsonResponse
+    public function store(PasswordResetRequest $request): Response
     {
         $user = $request->findUser();
         $otpVerificationToken = (new OtpTokenManagerService($user->email))->create();
@@ -22,7 +24,7 @@ class PasswordResetController extends Controller
             'data' => [
                 'email' => $user->email,
                 'token' => $otpVerificationToken->token,
-            ]
-        ]);
+            ],
+        ], Response::HTTP_CREATED);
     }
 }

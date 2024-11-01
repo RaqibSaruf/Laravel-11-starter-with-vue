@@ -4,22 +4,18 @@ declare(strict_types=1);
 
 namespace App\Traits;
 
-trait VerifyAccount
+trait VerifyAccountTrait
 {
     /**
      * Determine if the user has verified their phone number.
-     *
-     * @return bool
      */
     public function hasVerifiedPhone(): bool
     {
-        return ! is_null($this->phone_verified_at);
+        return !is_null($this->phone_verified_at);
     }
 
     /**
      * Mark the given user's phone as verified.
-     *
-     * @return bool
      */
     public function markPhoneAsVerified(): bool
     {
@@ -30,8 +26,6 @@ trait VerifyAccount
 
     /**
      * Get the phone address that should be used for verification.
-     *
-     * @return string
      */
     public function getPhoneForVerification(): string
     {
@@ -40,6 +34,6 @@ trait VerifyAccount
 
     public function isVerified(): bool
     {
-        return ! is_null($this->email_verified_at) || ! is_null($this->phone_verified_at);
+        return !is_null($this->email_verified_at) || !is_null($this->phone_verified_at);
     }
 }

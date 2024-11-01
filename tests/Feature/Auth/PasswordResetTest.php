@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
@@ -12,7 +14,7 @@ class PasswordResetTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_reset_password_link_can_be_requested(): void
+    public function testResetPasswordLinkCanBeRequested(): void
     {
         Notification::fake();
 
@@ -23,7 +25,7 @@ class PasswordResetTest extends TestCase
         Notification::assertSentTo($user, ResetPassword::class);
     }
 
-    public function test_password_can_be_reset_with_valid_token(): void
+    public function testPasswordCanBeResetWithValidToken(): void
     {
         Notification::fake();
 

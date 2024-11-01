@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -8,4 +10,4 @@ Route::get('/', function () {
 
 Route::get('/{pathMatch}', function () {
     return view('app');
-})->where('pathMatch', ".*");
+})->where('pathMatch', '.*');

@@ -11,5 +11,7 @@ class UserRegistered
 {
     use Dispatchable;
 
-    public function __construct(public User $user) {}
+    public function __construct(public User $user)
+    {
+    }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use App\Models\OtpVerificationToken;
@@ -13,11 +15,12 @@ class SendVerificationOtp extends Notification implements ShouldQueue
 {
     use Queueable;
 
-
     /**
      * Create a new notification instance.
      */
-    public function __construct(private OtpVerificationToken $otpVerificationToken) {}
+    public function __construct(private OtpVerificationToken $otpVerificationToken)
+    {
+    }
 
     /**
      * Get the notification's delivery channels.
@@ -34,8 +37,8 @@ class SendVerificationOtp extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
-            ->subject(Lang::get("Account Verification"))
+        return (new MailMessage())
+            ->subject(Lang::get('Account Verification'))
             ->markdown('emails.verification-notification', ['name' => $notifiable->name, 'otp' => $this->otpVerificationToken->otp]);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use App\Models\OtpVerificationToken;
@@ -12,7 +14,9 @@ class SendPasswordResetOtp extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(private OtpVerificationToken $otpVerificationToken) {}
+    public function __construct(private OtpVerificationToken $otpVerificationToken)
+    {
+    }
 
     /**
      * Get the notification's delivery channels.
@@ -29,8 +33,8 @@ class SendPasswordResetOtp extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
-            ->subject(Lang::get("Reset Password"))
+        return (new MailMessage())
+            ->subject(Lang::get('Reset Password'))
             ->markdown('emails.password-reset-notification', ['name' => $notifiable->name, 'otp' => $this->otpVerificationToken->otp]);
     }
 }

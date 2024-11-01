@@ -1,0 +1,7 @@
+# Ignore compiled files
+node_modules
+dist
+public/build
+
+# Ignore Tailwind CSS files if needed
+resources/css/app.css

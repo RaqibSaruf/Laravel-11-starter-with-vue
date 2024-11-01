@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
 use App\Services\OtpTokenManagerService;
@@ -10,9 +12,9 @@ use Illuminate\Support\Facades\DB;
 class VerificationRequest extends FormRequest
 {
     /**
-     * @var OtpTokenManagerService|null $tokenManager
+     * @var OtpTokenManagerService|null
      */
-    private $tokenManager = null;
+    private $tokenManager;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -23,7 +25,6 @@ class VerificationRequest extends FormRequest
 
         return $tokenManager->exists();
     }
-
 
     /**
      * Get the validation rules that apply to the request.
@@ -41,12 +42,12 @@ class VerificationRequest extends FormRequest
                 'max:6',
                 function (string $attribute, string $value, $fail) use ($tokenManager) {
                     if ($tokenManager->expired()) {
-                        $fail("Otp expired.");
+                        $fail('Otp expired.');
                     }
                     if (!$tokenManager->checkOtp($value)) {
-                        $fail("Otp is not matched.");
+                        $fail('Otp is not matched.');
                     }
-                }
+                },
             ],
         ];
     }
@@ -71,6 +72,7 @@ class VerificationRequest extends FormRequest
                     Auth::setUser($user);
                     $this->tokenManager->revoked();
                     DB::commit();
+
                     return true;
                 }
             }

@@ -1,20 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
 use App\Services\OtpTokenManagerService;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class NewPasswordRequest extends FormRequest
 {
     /**
-     * @var OtpTokenManagerService|null $tokenManager
+     * @var OtpTokenManagerService|null
      */
-    private $tokenManager = null;
+    private $tokenManager;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -34,6 +35,7 @@ class NewPasswordRequest extends FormRequest
     public function rules(): array
     {
         $tokenManager = $this->getManager();
+
         return [
             'otp' => [
                 'required',
@@ -41,12 +43,12 @@ class NewPasswordRequest extends FormRequest
                 'max:6',
                 function (string $attribute, string $value, $fail) use ($tokenManager) {
                     if ($tokenManager->expired()) {
-                        $fail("Otp expired.");
+                        $fail('Otp expired.');
                     }
                     if (!$tokenManager->checkOtp($value)) {
-                        $fail("Otp is not matched.");
+                        $fail('Otp is not matched.');
                     }
-                }
+                },
             ],
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'confirmed', 'min:6', 'max:60'],
@@ -57,9 +59,7 @@ class NewPasswordRequest extends FormRequest
     {
         $user = User::where('email', $this->email)->first();
         if (!$user) {
-            throw ValidationException::withMessages([
-                'email' => 'Email not exists',
-            ]);
+            throw ValidationException::withMessages(['email' => 'Email not exists']);
         }
 
         return $user;
@@ -81,6 +81,7 @@ class NewPasswordRequest extends FormRequest
         try {
             if ($this->tokenManager->verified() && $this->tokenManager->revoked()) {
                 DB::commit();
+
                 return true;
             }
         } catch (\Throwable $th) {
