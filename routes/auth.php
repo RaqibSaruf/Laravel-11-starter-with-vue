@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\v1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\v1\Auth\RegisteredUserController;
 use App\Http\Controllers\Api\v1\Auth\VerificationNotificationController;
 use App\Http\Controllers\Api\v1\Auth\VerifyController;
-use App\Http\Controllers\Api\v1\ProfileController;
+use App\Http\Controllers\Api\v1\Auth\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [RegisteredUserController::class, 'store'])

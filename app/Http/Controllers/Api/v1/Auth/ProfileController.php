@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api\v1;
+namespace App\Http\Controllers\Api\v1\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProfileUpdateRequest;
@@ -14,6 +14,7 @@ class ProfileController extends Controller
     public function myProfile(): Response
     {
         $user = Auth::user();
+        $user->is_verified = $user->isVerified();
         $user->load([
             'roles:id,name',
             'roles.permissions:id,name',
@@ -28,6 +29,7 @@ class ProfileController extends Controller
     public function updateProfile(ProfileUpdateRequest $request): Response
     {
         $user = Auth::user();
+        $user->is_verified = $user->isVerified();
         $user->update($request->only($user->getFillable()));
 
         return response()->json([

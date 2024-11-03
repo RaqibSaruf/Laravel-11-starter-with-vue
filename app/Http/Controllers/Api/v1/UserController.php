@@ -14,9 +14,7 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function __construct(private UserRepository $repository)
-    {
-    }
+    public function __construct(private UserRepository $repository) {}
 
     /**
      * Display a listing of the resource.
@@ -61,6 +59,7 @@ class UserController extends Controller
     {
         $this->authorize('show', $user);
 
+        $user->is_verified = $user->isVerified();
         $user->load('roles:id,name');
 
         return response()->json([
