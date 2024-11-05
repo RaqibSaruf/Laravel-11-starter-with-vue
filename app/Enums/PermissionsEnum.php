@@ -6,28 +6,13 @@ namespace App\Enums;
 
 enum PermissionsEnum: string
 {
-    case CREATEUSERS = 'users.create';
-    case EDITUSERS = 'users.edit';
-    case VIEWUSERS = 'users.view';
-    case DELETEUSERS = 'users.delete';
+    case CREATE_USERS = 'create.users';
+    case EDIT_USERS = 'edit.users';
+    case VIEW_USERS = 'view.users';
+    case DELETE_USERS = 'delete.users';
 
-    case CREATEROLES = 'roles.create';
-    case EDITROLES = 'roles.edit';
-    case VIEWROLES = 'roles.view';
-    case DELETEROLES = 'roles.delete';
-
-    public function label(): string
-    {
-        return match ($this) {
-            static::CREATEUSERS => 'Create Users',
-            static::EDITUSERS => 'Edit Users',
-            static::VIEWUSERS => 'View Users',
-            static::DELETEUSERS => 'Delete Users',
-
-            static::CREATEROLES => 'Create Roles',
-            static::EDITROLES => 'Edit Roles',
-            static::VIEWROLES => 'View Roles',
-            static::DELETEROLES => 'Delete Roles',
-        };
-    }
+    case CREATE_ROLES = 'create.roles';
+    case EDIT_ROLES = 'edit.roles';
+    case VIEW_ROLES = 'view.roles';
+    case DELETE_ROLES = 'delete.roles';
 }

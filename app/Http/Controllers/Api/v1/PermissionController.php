@@ -17,7 +17,7 @@ class PermissionController extends Controller
             'data' => collect(PermissionsEnum::cases())
                 ->map(function (PermissionsEnum $permission) {
                     return [
-                        'label' => $permission->label(),
+                        'label' => ucfirst(str_replace(['.', '/', '-', '_'], ' ', $permission->value)),
                         'value' => $permission->value,
                     ];
                 })

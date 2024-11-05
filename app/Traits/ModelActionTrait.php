@@ -53,12 +53,12 @@ trait ModelActionTrait
     private function softDeleteMany(Builder $query, array $identifiers, string $identifierName = 'id'): bool
     {
         if (!empty($identifiers)) {
-            if (!Auth::check()) {
-                loginUsingBearerToken();
-            }
-            $userId = Auth::id() ?? 0;
             $updatedValue = ['deleted_at' => now()];
             if (Schema::hasColumn($this->getTable(), 'deleted_by')) {
+                if (!Auth::check()) {
+                    loginUsingBearerToken();
+                }
+                $userId = Auth::id() ?? 0;
                 $updatedValue['deleted_by'] = $userId;
             }
             $delimiter = self::$DELIMITER ?? '::';
@@ -74,9 +74,9 @@ trait ModelActionTrait
         throw ValidationException::withMessages([$identifierName => "Please provide valid $identifierName's"]);
     }
 
-    public function scopeDeleteMany(Builder $query, array $identifiers, string $identifierName = 'id'): bool
+    public function scopeDeleteMany(Builder $query, array $identifiers, bool $forceDelete = false, string $identifierName = 'id'): bool
     {
-        if (Schema::hasColumn($this->getTable(), 'deleted_at')) {
+        if (!$forceDelete) {
             return $this->softDeleteMany($query, $identifiers, $identifierName);
         }
 
@@ -93,15 +93,15 @@ trait ModelActionTrait
     public function scopeUpdateMany(Builder $query, array $updatedData, array $identifiers, string $identifierName = 'id'): bool
     {
         if (!empty($identifiers)) {
-            if (!Auth::check()) {
-                loginUsingBearerToken();
-            }
-            $userId = Auth::id() ?? 0;
-            if (Schema::hasColumn($this->getTable(), 'updated_at')) {
+            if (!isset($updatedData['updated_at']) && Schema::hasColumn($this->getTable(), 'updated_at')) {
                 $updatedData['updated_at'] = now();
             }
 
-            if (Schema::hasColumn($this->getTable(), 'updated_by')) {
+            if (!isset($updatedData['updated_by']) && Schema::hasColumn($this->getTable(), 'updated_by')) {
+                if (!Auth::check()) {
+                    loginUsingBearerToken();
+                }
+                $userId = Auth::id() ?? 0;
                 $updatedData['updated_by'] = $userId;
             }
 

@@ -7,7 +7,8 @@ use App\Http\Controllers\Api\v1\RoleController;
 use App\Http\Controllers\Api\v1\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:sanctum', 'verified', 'throttle:60,1'])
+Route::prefix('v1')
+    ->middleware(['auth:sanctum', 'verified', 'throttle:60,1'])
     ->group(function () {
         Route::apiResource('roles', RoleController::class);
         Route::get('/role/list', [RoleController::class, 'list']);

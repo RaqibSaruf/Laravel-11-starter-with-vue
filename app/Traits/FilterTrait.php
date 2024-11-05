@@ -24,15 +24,15 @@ trait FilterTrait
             $table = $this->getTable();
             $likeFilterFields = $this->getLikeFilterFields();
             foreach ($filters as $field => $value) {
-                if (!in_array($field, $defaultFillableFields, true)) {
+                if (!in_array($field, $defaultFillableFields, true) && ($value === null || $value === '')) {
                     continue;
                 }
 
-                if ($likeFilterFields && in_array($field, $likeFilterFields, true) && $value) {
+                if ($likeFilterFields && in_array($field, $likeFilterFields, true)) {
                     $query->where($table . '.' . $field, 'LIKE', "%$value%");
                 } elseif (is_array($value) && !empty($value)) {
                     $query->whereIn($table . '.' . $field, $value);
-                } elseif (is_numeric($value) || is_bool($value) || $value) {
+                } else {
                     $query->where($table . '.' . $field, $value);
                 }
             }
@@ -68,15 +68,15 @@ trait FilterTrait
             $likeFilterFields = method_exists($model, 'getLikeFilterFields') ? $model->getLikeFilterFields() : [];
             $table = $model->getTable();
             foreach ($filters as $field => $value) {
-                if (!in_array($field, $defaultFillableFields, true)) {
+                if (!in_array($field, $defaultFillableFields, true) && ($value === null || $value === '')) {
                     continue;
                 }
                 $query->whereHas($relationName, function ($query) use ($field, $value, $likeFilterFields, $table) {
-                    if ($likeFilterFields && in_array($field, $likeFilterFields, true) && $value) {
+                    if ($likeFilterFields && in_array($field, $likeFilterFields, true)) {
                         $query->where($table . '.' . $field, 'LIKE', "%$value%");
                     } elseif (is_array($value) && !empty($value)) {
                         $query->whereIn($table . '.' . $field, $value);
-                    } elseif (is_numeric($value) || is_bool($value) || $value) {
+                    } else {
                         $query->where($table . '.' . $field, $value);
                     }
                 });

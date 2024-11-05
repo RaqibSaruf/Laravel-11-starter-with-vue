@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Traits;
+namespace App\Policies;
 
 use App\Enums\RolesEnum;
 use App\Models\User;
 
-trait SuperAdminPolicyTrait
+class Policy
 {
     public function before(User $user, string $ability): ?bool
     {
-        if ($user->hasRole(RolesEnum::SUPERADMIN->value)) {
+        if ($user->hasRole([RolesEnum::SUPERADMIN->value, RolesEnum::ADMIN->value])) {
             return true;
         }
 

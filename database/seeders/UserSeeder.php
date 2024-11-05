@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
     {
         User::create([
             'name' => 'Test User',
-            'email' => 'raqibul.dev@gamil.com',
+            'email' => 'raqibul.dev@gmail.com',
             'password' => Hash::make('12345678'),
             'email_verified_at' => now(),
         ])->assignRole(RolesEnum::SUPERADMIN->value);
