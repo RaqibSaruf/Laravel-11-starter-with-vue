@@ -14,7 +14,9 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function __construct(private UserRepository $repository) {}
+    public function __construct(private UserRepository $repository)
+    {
+    }
 
     /**
      * Display a listing of the resource.

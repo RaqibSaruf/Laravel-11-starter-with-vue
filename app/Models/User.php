@@ -6,8 +6,9 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Traits\BatchActionTrait;
+use App\Traits\CreatedUpdatedDeletedByTrait;
 use App\Traits\FilterTrait;
-use App\Traits\ModelActionTrait;
 use App\Traits\VerifyAccountTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,7 +25,8 @@ class User extends Authenticatable
     use HasRoles;
     use Notifiable;
     use VerifyAccountTrait;
-    use ModelActionTrait;
+    use CreatedUpdatedDeletedByTrait;
+    use BatchActionTrait;
     use SoftDeletes;
     use FilterTrait;
 

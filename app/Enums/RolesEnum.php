@@ -8,12 +8,4 @@ enum RolesEnum: string
 {
     case SUPERADMIN = 'super-admin';
     case ADMIN = 'admin';
-
-    public function label(): string
-    {
-        return match ($this) {
-            static::SUPERADMIN => 'Super Admin',
-            static::ADMIN => 'Admin',
-        };
-    }
 }

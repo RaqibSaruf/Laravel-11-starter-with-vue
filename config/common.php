@@ -6,6 +6,6 @@ return [
     'pagi_limit' => 20,
     'status' => [
         'active' => 1,
-        'inactive' => 0
+        'inactive' => 0,
     ],
 ];

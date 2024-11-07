@@ -7,62 +7,51 @@ namespace App\Traits;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
-trait ModelActionTrait
+trait BatchActionTrait
 {
-    private static $DELIMITER = '::';
-
-    protected function getDuplicateAvoidColumns(): array
+    private function getDelimiter()
     {
+        return $this->DELIMITER ?? '::';
+    }
+
+    protected function getBatchDuplicateAvoidColumns(): array
+    {
+        if (method_exists($this, 'getDuplicateAvoidColumns')) {
+            return $this->getDuplicateAvoidColumns();
+        }
+
         return $this->duplicateAvoidColumns ?? [];
     }
 
-    public static function bootCreatedUpdatedDeletedBy()
+    protected function getBatchAutoFillFields(): array
     {
-        if (!Auth::check()) {
-            loginUsingBearerToken();
+        if (method_exists($this, 'getAutoFillFields')) {
+            return $this->getAutoFillFields();
         }
-        $userId = Auth::id() ?? 0;
 
-        static::creating(function ($model) use ($userId) {
-            if ($userId && Schema::hasColumn($model->getTable(), 'created_by')) {
-                $model->created_by = $userId;
-            }
-        });
-
-        static::updating(function ($model) use ($userId) {
-            if ($userId && Schema::hasColumn($model->getTable(), 'updated_by')) {
-                $model->updated_by = $userId;
-            }
-        });
-
-        static::deleting(function ($model) use ($userId) {
-            foreach ($model->getDuplicateAvoidColumns() as $column) {
-                $newValue = $model->id . self::$DELIMITER . $model->{$column};
-                $model->{$column} = $newValue;
-            }
-            if ($userId && Schema::hasColumn($model->getTable(), 'deleted_by')) {
-                $model->deleted_by = $userId;
-            }
-            $model->save();
-        });
+        return $this->autoFillFields ?? [];
     }
 
     private function softDeleteMany(Builder $query, array $identifiers, string $identifierName = 'id'): bool
     {
+        if (!in_array('deleted_at', $this->getBatchAutoFillFields(), true)) {
+            throw new \RuntimeException("You don't have any softdelete auto fill field");
+        }
+
         if (!empty($identifiers)) {
             $updatedValue = ['deleted_at' => now()];
-            if (Schema::hasColumn($this->getTable(), 'deleted_by')) {
+            if (in_array('deleted_by', $this->getBatchAutoFillFields(), true)) {
                 if (!Auth::check()) {
                     loginUsingBearerToken();
                 }
                 $userId = Auth::id() ?? 0;
                 $updatedValue['deleted_by'] = $userId;
             }
-            $delimiter = self::$DELIMITER ?? '::';
-            foreach ($this->getDuplicateAvoidColumns() as $columnName) {
+            $delimiter = $this->getDelimiter();
+
+            foreach ($this->getBatchDuplicateAvoidColumns() as $columnName) {
                 $updatedValue[$columnName] = DB::raw("CONCAT($identifierName, '$delimiter', $columnName)");
             }
             $result = $query->whereIn($identifierName, $identifiers)
@@ -93,11 +82,11 @@ trait ModelActionTrait
     public function scopeUpdateMany(Builder $query, array $updatedData, array $identifiers, string $identifierName = 'id'): bool
     {
         if (!empty($identifiers)) {
-            if (!isset($updatedData['updated_at']) && Schema::hasColumn($this->getTable(), 'updated_at')) {
+            if (!isset($updatedData['updated_at']) && in_array('updated_at', $this->getBatchAutoFillFields(), true)) {
                 $updatedData['updated_at'] = now();
             }
 
-            if (!isset($updatedData['updated_by']) && Schema::hasColumn($this->getTable(), 'updated_by')) {
+            if (!isset($updatedData['updated_by']) && in_array('updated_by', $this->getBatchAutoFillFields(), true)) {
                 if (!Auth::check()) {
                     loginUsingBearerToken();
                 }
