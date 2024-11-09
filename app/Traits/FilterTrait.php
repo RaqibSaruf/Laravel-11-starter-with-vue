@@ -90,11 +90,11 @@ trait FilterTrait
     {
         if ($orderBy instanceof Request) {
             $request = $orderBy;
-            $orderBy = $request->input('order_by', 'id');
-            $sortDirection = $request->input('dir', $sortDirection);
+            $orderBy = $request->input('order_by') ?? 'id';
+            $sortDirection = $request->input('dir') ?? $sortDirection;
         } elseif (is_array($orderBy)) {
-            $orderBy = $filters['order_by'] ?? 'id';
-            $sortDirection = $filters['dir'] ?? $sortDirection;
+            $orderBy = $orderBy['order_by'] ?? 'id';
+            $sortDirection = $orderBy['dir'] ?? $sortDirection;
         }
 
         $query->orderBy($this->getTable() . '.' . $orderBy, $sortDirection);
@@ -117,8 +117,12 @@ trait FilterTrait
         return $query;
     }
 
-    public function scopeStatus(Builder $query, int|bool|string $value, string $fieldName = 'status'): Builder
+    public function scopeStatus(Builder $query, int|bool|string|null $value = null, string $fieldName = 'status'): Builder
     {
-        return $query->where($this->getTable() . '.' . $fieldName, $value);
+        if (!empty($fieldName) && $value !== null) {
+            return $query->where($this->getTable() . '.' . $fieldName, $value);
+        }
+
+        return $query;
     }
 }
